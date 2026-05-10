@@ -1,4 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks, WebSocket, WebSocketDisconnect
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 from config import settings
@@ -12,7 +13,16 @@ import uvicorn
 # Create DB tables
 Base.metadata.create_all(bind=db_engine)
 
-app = FastAPI(title="AI Junction Optimization API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    # Use create_task directly to ensure it runs continuously
+    asyncio.create_task(sim_engine.run_loop())
+    yield
+    # Shutdown
+    sim_engine.running = False
+
+app = FastAPI(title="AI Junction Optimization API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,14 +37,7 @@ app.include_router(emergency.router, prefix="/api/emergency", tags=["emergency"]
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(ai.router, prefix="/api/ai", tags=["ai insights"])
 
-@app.on_event("startup")
-async def startup_event():
-    # Use create_task directly to ensure it runs continuously
-    asyncio.create_task(sim_engine.run_loop())
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    sim_engine.running = False
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -59,6 +62,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 elif msg.get("type") == "cancel_emergency":
                     sim_engine.state.emergency_active = False
                     sim_engine.state.emergency_direction = None
+                    # Force immediate re-evaluation on next tick
+                    sim_engine.state.phase_elapsed_seconds = sim_engine.state.phase_duration_seconds
             except:
                 pass
     except WebSocketDisconnect:

@@ -16,6 +16,8 @@ interface JunctionStore {
   addDecision: (decision: AIDecision) => void;
   addInsight: (insight: CongestionPrediction) => void;
   setEmergency: (active: boolean, direction: string | null) => void;
+  setSendMessage: (fn: (msg: any) => void) => void;
+  sendMessage: (msg: any) => void;
 }
 
 export const useJunctionStore = create<JunctionStore>((set) => ({
@@ -50,4 +52,8 @@ export const useJunctionStore = create<JunctionStore>((set) => ({
         junctionState: state.junctionState
     };
   }),
+  setSendMessage: (fn) => set({ sendMessage: fn }),
+  sendMessage: () => {
+    console.warn('Socket not connected yet');
+  },
 }));

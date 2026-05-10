@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BarChart3, 
@@ -16,6 +16,7 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: 
 
   <NavLink
     to={to}
+    end={end}
     className={({ isActive }) =>
       clsx(
         'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
@@ -47,7 +48,7 @@ const DashboardLayout = () => {
           </div>
 
           <nav className="space-y-2">
-            <SidebarItem to="/dashboard" icon={LayoutDashboard} label="Overview" />
+            <SidebarItem to="/dashboard" end={true} icon={LayoutDashboard} label="Overview" />
             <SidebarItem to="/dashboard/analytics" icon={BarChart3} label="Analytics" />
             <SidebarItem to="/dashboard/insights" icon={BrainCircuit} label="AI Insights" />
             <SidebarItem to="/dashboard/settings" icon={Settings} label="Settings" />
@@ -55,7 +56,7 @@ const DashboardLayout = () => {
         </div>
 
         <div className="mt-auto p-6 space-y-4">
-           <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
+            <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
               <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">System Status</div>
               <div className="flex items-center gap-2">
                  <div className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
@@ -63,9 +64,12 @@ const DashboardLayout = () => {
                    {connectionStatus === 'connected' ? 'Live WebSocket' : 'Disconnected'}
                  </span>
               </div>
-           </div>
+            </div>
            
-           <button className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-rose-400 transition-colors">
+           <button 
+             onClick={handleSignOut}
+             className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-rose-400 transition-colors"
+           >
               <LogOut size={20} />
               <span className="font-medium">Sign Out</span>
            </button>

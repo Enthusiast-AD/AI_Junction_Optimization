@@ -31,6 +31,7 @@ export interface JunctionState {
   emergency_active: boolean;
   emergency_direction: string | null;
   ai_decision: AIDecision | null;
+  performance?: PerformanceMetrics;
 }
 
 export interface DensityDataPoint {
