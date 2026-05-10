@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Activity, Zap, ShieldAlert, TrendingUp, ArrowRight, Code, Database, Brain, Network, Cpu, LineChart } from 'lucide-react';
+import { Activity, ShieldAlert, TrendingUp, ArrowRight,Database, Brain, Network, Cpu, LineChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 
