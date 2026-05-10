@@ -10,42 +10,34 @@ export const AIDecisionFeed = ({ decisions }: AIDecisionFeedProps) => {
   return (
     <div className="space-y-4">
       <AnimatePresence initial={false}>
-        {decisions.map((decision, index) => (
+        {decisions.slice(0, 3).map((decision, index) => (
           <motion.div
             key={`${decision.recommended_phase}-${index}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 flex items-start gap-4"
+            className="p-3 rounded-xl bg-slate-900/50 border border-slate-800 flex items-start gap-3"
           >
-            <div className={`mt-1 p-2 rounded-lg ${
+            <div className={`mt-0.5 p-1.5 rounded-lg ${
               decision.model_used.includes('llama') ? 'bg-primary-500/10 text-primary-500' :
               decision.model_used.includes('gemini') ? 'bg-emerald-500/10 text-emerald-500' :
               'bg-slate-500/10 text-slate-500'
             }`}>
-              {decision.model_used.includes('llama') ? <Cpu size={18} /> : <Brain size={18} />}
+              {decision.model_used.includes('llama') ? <Cpu size={16} /> : <Brain size={16} />}
             </div>
             
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-bold text-white uppercase tracking-wider">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
                   Phase: {decision.recommended_phase}
                 </span>
-                <span className="text-[10px] font-mono text-slate-500">
+                <span className="text-[9px] font-mono text-slate-500">
                   {decision.latency_ms}ms
                 </span>
               </div>
-              <p className="text-xs text-slate-400 line-clamp-2 italic">
+              <p className="text-[10px] text-slate-400 truncate italic">
                 "{decision.reason}"
               </p>
-              <div className="mt-2 flex items-center gap-3">
-                 <div className="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] font-medium text-slate-300">
-                    {decision.duration_seconds}s duration
-                 </div>
-                 <div className="px-2 py-0.5 rounded-md bg-primary-500/10 text-[10px] font-medium text-primary-400">
-                    {decision.model_used}
-                 </div>
-              </div>
             </div>
           </motion.div>
         ))}

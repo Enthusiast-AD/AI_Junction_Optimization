@@ -2,14 +2,28 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Settings2, Cpu, Zap, RotateCcw, CheckCircle2, XCircle } from 'lucide-react';
+import { useJunctionStore } from '../store/useJunctionStore';
 const SettingsPage = () => {
+  const { connectionStatus, junctionState } = useJunctionStore();
   const [optimizationMode, setOptimizationMode] = useState<'ai' | 'fixed'>('ai');
   const [simSpeed, setSimSpeed] = useState(1);
 
   const apiStatus = [
-    { name: 'Groq API (Llama 3)', status: 'connected', latency: '42ms' },
-    { name: 'Gemini API (Flash)', status: 'connected', latency: '156ms' },
-    { name: 'WebSocket Server', status: 'disconnected', latency: '--' },
+    { 
+      name: 'Groq API (Llama 3)', 
+      status: junctionState?.ai_decision?.model_used.includes('llama') ? 'connected' : 'idle', 
+      latency: junctionState?.ai_decision?.latency_ms ? `${junctionState.ai_decision.latency_ms}ms` : '--' 
+    },
+    { 
+      name: 'Gemini API (Flash)', 
+      status: junctionState?.ai_decision?.model_used.includes('gemini') ? 'connected' : 'idle', 
+      latency: '--' 
+    },
+    { 
+      name: 'WebSocket Server', 
+      status: connectionStatus === 'connected' ? 'connected' : connectionStatus === 'connecting' ? 'connecting' : 'disconnected', 
+      latency: connectionStatus === 'connected' ? 'Live' : '--' 
+    },
   ];
 
   return (
@@ -118,7 +132,15 @@ const SettingsPage = () => {
               <div className="flex items-start gap-2">
                 <Zap className="text-amber-500 shrink-0 mt-0.5" size={16} />
                 <div className="text-sm text-amber-200/80">
-                  <span className="font-bold text-amber-500">Notice:</span> WebSocket server is currently mocked. Run the FastAPI backend on port 8000 to enable live streaming.
+                  {connectionStatus === 'connected' ? (
+                    <>
+                      <span className="font-bold text-emerald-500">Connected:</span> Live streaming is active from the FastAPI backend.
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-bold text-amber-500">Notice:</span> WebSocket server is {connectionStatus}. Run the FastAPI backend on port 8000 to enable live streaming.
+                    </>
+                  )}
                 </div>
               </div>
             </div>

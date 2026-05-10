@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BarChart3, 
@@ -9,10 +9,13 @@ import {
   Bell
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useSocket } from '../hooks/useSocket';
+import { useJunctionStore } from '../store/useJunctionStore';
 
-const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => (
+const SidebarItem = ({ to, icon: Icon, label, end }: { to: string; icon: any; label: string; end?: boolean }) => (
   <NavLink
     to={to}
+    end={end}
     className={({ isActive }) =>
       clsx(
         'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
@@ -28,6 +31,15 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: 
 );
 
 const DashboardLayout = () => {
+  const navigate = useNavigate();
+  useSocket(); // Global websocket connection
+  const connectionStatus = useJunctionStore((state) => state.connectionStatus);
+
+  const handleSignOut = () => {
+    // In a real app, clear tokens here
+    navigate('/');
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-slate-950 text-slate-100">
       {/* Sidebar */}
@@ -41,7 +53,7 @@ const DashboardLayout = () => {
           </div>
 
           <nav className="space-y-2">
-            <SidebarItem to="/dashboard" icon={LayoutDashboard} label="Overview" />
+            <SidebarItem to="/dashboard" end={true} icon={LayoutDashboard} label="Overview" />
             <SidebarItem to="/dashboard/analytics" icon={BarChart3} label="Analytics" />
             <SidebarItem to="/dashboard/insights" icon={BrainCircuit} label="AI Insights" />
             <SidebarItem to="/dashboard/settings" icon={Settings} label="Settings" />
@@ -49,15 +61,25 @@ const DashboardLayout = () => {
         </div>
 
         <div className="mt-auto p-6 space-y-4">
-           <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
+            <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
               <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">System Status</div>
               <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-sm font-medium text-slate-300">Live Simulation</span>
+                <div className={clsx(
+                  "w-2 h-2 rounded-full",
+                  connectionStatus === 'connected' ? "bg-emerald-500 animate-pulse" : 
+                  connectionStatus === 'connecting' ? "bg-amber-500 animate-pulse" : "bg-rose-500"
+                )} />
+                <span className="text-sm font-medium text-slate-300">
+                  {connectionStatus === 'connected' ? 'Live System' : 
+                   connectionStatus === 'connecting' ? 'Connecting...' : 'Offline'}
+                </span>
               </div>
-           </div>
+            </div>
            
-           <button className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-rose-400 transition-colors">
+           <button 
+             onClick={handleSignOut}
+             className="flex items-center gap-3 px-4 py-2 w-full text-slate-500 hover:text-rose-400 transition-colors"
+           >
               <LogOut size={20} />
               <span className="font-medium">Sign Out</span>
            </button>
