@@ -46,11 +46,14 @@ const OverviewPage = () => {
     addInsight,
   } = useJunctionStore();
 
+  const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
   useEffect(() => {
       // Poll prediction endpoint every 2 minutes
       const fetchPrediction = async () => {
           try {
-              const res = await fetch('http://localhost:8000/api/ai/prediction');
+              const res = await fetch(`${API_URL}/api/ai/prediction`);
               const data = await res.json();
               addInsight(data);
           } catch(e) {
@@ -190,7 +193,7 @@ const OverviewPage = () => {
              isActive={emergencyActive} 
              onActivate={(dir, type) => {
                  setEmergency(true, dir);
-                 fetch('http://localhost:8000/api/emergency/trigger', {
+                 fetch(`${API_URL}/api/emergency/trigger`, {
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify({
@@ -202,7 +205,7 @@ const OverviewPage = () => {
              }} 
              onCancel={() => {
                  setEmergency(false, null);
-                 fetch('http://localhost:8000/api/emergency/cancel', { method: 'POST' }).catch(console.error);
+                 fetch(`${API_URL}/api/emergency/cancel`, { method: 'POST' }).catch(console.error);
              }} 
            />
 
