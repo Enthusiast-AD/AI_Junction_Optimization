@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import { 
   Users, 
   Clock, 
-
+  TrendingUp,
   Activity,
   AlertTriangle,
   Zap,
-  Sparkles,
   Brain
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
@@ -43,6 +41,7 @@ const OverviewPage = () => {
     decisionLog,
     insightLog,
     emergencyActive,
+    connectionStatus,
     setEmergency,
     addInsight
   } = useJunctionStore();
@@ -186,7 +185,7 @@ const OverviewPage = () => {
         </div>
 
         {/* Sidebar: Emergency, AI Decision Feed & Insights */}
-        <div className="space-y-8">
+        <div className="xl:col-span-4 space-y-8">
            <EmergencyPanel 
              isActive={emergencyActive} 
              onActivate={(dir, type) => {

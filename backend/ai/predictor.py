@@ -33,9 +33,9 @@ async def generate_prediction(history_data: list) -> CongestionPrediction:
     }}
     """
     
-    response = await model.generate_content_async(prompt)
-    # parsing logic left basic for hackathon structure
     try:
+        response = await model.generate_content_async(prompt)
+        # parsing logic left basic for hackathon structure
         content = response.text.replace("```json", "").replace("```", "").strip()
         parsed = json.loads(content)
         return CongestionPrediction(
@@ -53,7 +53,7 @@ async def generate_prediction(history_data: list) -> CongestionPrediction:
             congestion_risk="medium",
             predicted_peak_lane="north",
             predicted_peak_in_minutes=5,
-            recommendation="Parse failed",
+            recommendation="AI Prediction failed (Quota/Network)",
             summary=str(e),
             model_used=settings.GEMINI_MODEL
         )

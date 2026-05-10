@@ -8,14 +8,14 @@ from database.db import SessionLocal
 from database.models import DecisionLog
 
 SIMULATION_CONFIG = {
-    "update_interval_seconds": 5,
+    "update_interval_seconds": 1,
     "lanes": ["north", "south", "east", "west"],
     "base_density": {
-        "north": 3, "south": 2, "east": 4, "west": 1
+        "north": 12, "south": 5, "east": 20, "west": 8
     },
-    "max_vehicles_per_lane": 30,
-    "green_drain_rate": 0.6,
-    "red_accumulation_rate": 0.8,
+    "max_vehicles_per_lane": 100,
+    "green_drain_rate": 0.8,
+    "red_accumulation_rate": 0.15,
 }
 
 class SimulationEngine:
@@ -43,21 +43,20 @@ class SimulationEngine:
         for lane in SIMULATION_CONFIG["lanes"]:
             lane_data = self.state.lanes[lane]
             if lane == self.state.current_phase:
-                # Drain vehicles if green
-                cleared = int(SIMULATION_CONFIG["green_drain_rate"] * SIMULATION_CONFIG["update_interval_seconds"])
+                # Drain vehicles if green - fast drain
+                cleared = 1 if random.random() < SIMULATION_CONFIG["green_drain_rate"] else 0
                 lane_data.vehicle_count = max(0, lane_data.vehicle_count - cleared)
                 self.state.performance.total_vehicles_cleared += cleared
                 # Decrease avg wait time significantly when green
-                lane_data.avg_wait_seconds = max(0.0, lane_data.avg_wait_seconds - (SIMULATION_CONFIG["update_interval_seconds"] * 2))
+                lane_data.avg_wait_seconds = max(0.0, lane_data.avg_wait_seconds - 2.0)
             else:
-                # Accumulate vehicles if red
-                added = int(SIMULATION_CONFIG["red_accumulation_rate"] * SIMULATION_CONFIG["update_interval_seconds"])
-                # Add random noise
-                added += random.randint(-1, 2)
-                lane_data.vehicle_count = min(SIMULATION_CONFIG["max_vehicles_per_lane"], max(0, lane_data.vehicle_count + added))
+                # Accumulate vehicles if red - slow accumulation
+                if random.random() < SIMULATION_CONFIG["red_accumulation_rate"]:
+                    lane_data.vehicle_count = min(SIMULATION_CONFIG["max_vehicles_per_lane"], lane_data.vehicle_count + 1)
+                
                 # Increase avg wait time
                 if lane_data.vehicle_count > 0:
-                    lane_data.avg_wait_seconds += SIMULATION_CONFIG["update_interval_seconds"]
+                    lane_data.avg_wait_seconds += 1.0
             
             lane_data.density_percent = (lane_data.vehicle_count / SIMULATION_CONFIG["max_vehicles_per_lane"]) * 100
 
