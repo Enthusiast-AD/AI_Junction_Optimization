@@ -18,7 +18,6 @@ import { DensityChart } from '../components/DensityChart';
 import { AIDecisionFeed } from '../components/AIDecisionFeed';
 import { EmergencyPanel } from '../components/EmergencyPanel';
 import { useJunctionStore } from '../store/useJunctionStore';
-import { generateMockHistory } from '../utils/mockData';
 
 const StatCard = ({ title, value, unit, icon: Icon, color }: any) => (
   <Card className="flex-1 p-4 py-3">
@@ -40,35 +39,36 @@ const StatCard = ({ title, value, unit, icon: Icon, color }: any) => (
 const OverviewPage = () => {
   const { 
     junctionState, 
-    densityHistory, 
-    appendDensityPoint,
+    densityHistory,
     decisionLog,
-    emergencyActive,
-    sendMessage,
     insightLog,
-    connectionStatus
+    emergencyActive,
+    setEmergency,
+    addInsight
   } = useJunctionStore();
 
   useEffect(() => {
-    if (densityHistory.length === 0) {
-      generateMockHistory(30).forEach(point => appendDensityPoint(point));
-    }
-  }, []);
+      // Poll prediction endpoint every 2 minutes
+      const fetchPrediction = async () => {
+          try {
+              const res = await fetch('http://localhost:8000/api/ai/prediction');
+              const data = await res.json();
+              addInsight(data);
+          } catch(e) {
+              console.error("Failed to fetch predictive insight", e);
+          }
+      };
 
-  const handleEmergencyActivate = (direction: string, vehicleType: string) => {
-    sendMessage({
-      type: 'trigger_emergency',
-      data: { direction, vehicle_type: vehicleType }
-    });
-  };
+      fetchPrediction(); // call immediately on mount
+      const interval = setInterval(fetchPrediction, 120000); 
+      return () => clearInterval(interval);
+  }, [addInsight]);
 
-  const handleEmergencyCancel = () => {
-    sendMessage({
-      type: 'cancel_emergency'
-    });
-  };
-
-  if (!junctionState) return null;
+  if (!junctionState) return (
+    <div className="flex items-center justify-center h-full">
+      <p className="text-slate-500">Waiting for live data via WebSocket...</p>
+    </div>
+  );
 
   return (
     <motion.div 
@@ -185,13 +185,27 @@ const OverviewPage = () => {
           </Card>
         </div>
 
-        {/* Sidebar Column */}
-        <div className="xl:col-span-4 space-y-4">
-          <EmergencyPanel 
-            isActive={emergencyActive} 
-            onActivate={handleEmergencyActivate}
-            onCancel={handleEmergencyCancel}
-          />
+        {/* Sidebar: Emergency, AI Decision Feed & Insights */}
+        <div className="space-y-8">
+           <EmergencyPanel 
+             isActive={emergencyActive} 
+             onActivate={(dir, type) => {
+                 setEmergency(true, dir);
+                 fetch('http://localhost:8000/api/emergency/trigger', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({
+                         direction: dir,
+                         vehicle_type: type,
+                         duration_override_seconds: 120
+                     })
+                 }).catch(console.error);
+             }} 
+             onCancel={() => {
+                 setEmergency(false, null);
+                 fetch('http://localhost:8000/api/emergency/cancel', { method: 'POST' }).catch(console.error);
+             }} 
+           />
 
           <Card className="bg-[#0f172a]/20">
             <CardHeader className="py-3">
@@ -208,45 +222,35 @@ const OverviewPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-indigo-950/10 border-indigo-500/10 overflow-hidden relative group">
-             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-             <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-4">
-                   <Sparkles size={16} className="text-indigo-400" />
-                   <CardTitle className="text-sm text-indigo-100">Predictive Insight</CardTitle>
-                </div>
-                
-                {insightLog[0] ? (
-                  <>
-                    <div className={`p-3 rounded-xl border mb-3 ${
-                      insightLog[0].congestion_risk === 'high' ? 'bg-rose-500/10 border-rose-500/20' :
-                      insightLog[0].congestion_risk === 'medium' ? 'bg-amber-500/10 border-amber-500/20' :
-                      'bg-emerald-500/10 border-emerald-500/20'
-                    }`}>
-                      <div className={`flex items-center gap-1.5 text-[9px] font-black uppercase mb-1.5 ${
-                        insightLog[0].congestion_risk === 'high' ? 'text-rose-400' :
-                        insightLog[0].congestion_risk === 'medium' ? 'text-amber-400' :
-                        'text-emerald-400'
-                      }`}>
-                          <AlertTriangle size={12} /> {insightLog[0].congestion_risk} Risk
-                      </div>
-                      <p className="text-[11px] text-slate-300 leading-relaxed italic">
-                          "{insightLog[0].summary}"
-                      </p>
+           <Card className="bg-gradient-to-br from-indigo-900/20 to-slate-900 border-indigo-500/20">
+              <CardContent className="pt-6">
+                 <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+                       <TrendingUp size={20} />
                     </div>
-                    <Link to="/dashboard/insights">
-                      <Button variant="outline" size="sm" className="w-full h-8 text-[10px] border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10">
-                          View Full Analysis
-                      </Button>
-                    </Link>
-                  </>
-                ) : (
-                  <div className="py-6 text-center border border-dashed border-slate-800 rounded-xl">
-                     <p className="text-[10px] text-slate-500 italic">Analyzing traffic patterns...</p>
-                  </div>
-                )}
-             </CardContent>
-          </Card>
+                    <CardTitle className="text-indigo-100">Predictive Insight</CardTitle>
+                 </div>
+                 <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 mb-4 h-[120px] overflow-y-auto">
+                    {insightLog.length > 0 ? (
+                       <>
+                          <div className="flex items-center gap-2 text-rose-400 text-xs font-bold uppercase mb-2">
+                             <AlertTriangle size={14} /> Risk: {insightLog[0].congestion_risk}
+                          </div>
+                          <p className="text-sm text-slate-300 leading-relaxed">
+                             {insightLog[0].recommendation}
+                          </p>
+                       </>
+                    ) : (
+                       <div className="h-full flex items-center justify-center text-sm text-indigo-300 italic">
+                          Awaiting prediction model data...
+                       </div>
+                    )}
+                 </div>
+                 <Button variant="outline" size="sm" className="w-full border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10">
+                    View Analysis
+                 </Button>
+              </CardContent>
+           </Card>
         </div>
       </div>
     </motion.div>

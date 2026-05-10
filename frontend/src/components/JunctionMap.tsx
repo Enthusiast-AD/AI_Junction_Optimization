@@ -6,35 +6,39 @@ interface JunctionMapProps {
   state: JunctionState;
 }
 
-const LaneLabel = ({ name, data, isActive, position }: { name: string; data: any; isActive: boolean; position: string }) => {
+const Signal = ({ isActive, isEmergencyOverride, direction }: { phase: string; isActive: boolean; isEmergencyOverride: boolean; direction: 'N' | 'S' | 'E' | 'W' }) => {
+  const showGreen = isActive || isEmergencyOverride;
   return (
-    <div className={`absolute ${position} flex flex-col items-center z-20 pointer-events-none`}>
-       {/* Glowing Lane Marker */}
-       <div className={`px-2 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-widest transition-all duration-500 shadow-xl ${
-         isActive 
-           ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-emerald-500/20 scale-110' 
-           : 'bg-slate-900/80 text-slate-500 border-slate-700 opacity-60'
-       }`}>
-         {name}
-       </div>
-       
-       {/* Real-time Stat Overlay */}
-       <div className="mt-1 flex flex-col items-center">
-          <div className="flex items-baseline gap-1">
-             <span className={`text-sm font-black transition-colors duration-500 ${isActive ? 'text-white' : 'text-slate-400'}`}>
-                {data.vehicle_count}
-             </span>
-             <span className="text-[7px] font-bold text-slate-600 uppercase">Veh</span>
-          </div>
-          {isActive && (
-             <motion.div 
-               animate={{ opacity: [0.4, 1, 0.4] }}
-               transition={{ repeat: Infinity, duration: 1.5 }}
-               className="text-[7px] font-black text-emerald-400 uppercase tracking-tighter"
-             >
-               Moving
-             </motion.div>
-          )}
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-[10px] font-bold text-slate-500">{direction}</span>
+      <div className="w-6 h-14 bg-slate-900 rounded-full border border-slate-800 p-1 flex flex-col gap-1 items-center">
+        <div className={`w-4 h-4 rounded-full transition-colors duration-300 ${showGreen ? 'bg-red-500/10' : 'bg-red-500'} ${!showGreen ? 'shadow-[0_0_12px_rgba(239,68,68,0.5)]' : ''}`} />
+        <div className={`w-4 h-4 rounded-full transition-colors duration-300 ${showGreen ? 'bg-green-500' : 'bg-green-500/10'} ${showGreen ? 'shadow-[0_0_12px_rgba(34,197,94,0.5)]' : ''}`} />
+      </div>
+    </div>
+  );
+};
+
+const DensityBar = ({ count, direction }: { count: number; direction: 'N' | 'S' | 'E' | 'W' }) => {
+  const max = 25;
+  const percentage = Math.min((count / max) * 100, 100);
+  
+  const getColor = () => {
+    if (percentage > 70) return 'bg-rose-500';
+    if (percentage > 40) return 'bg-amber-500';
+    return 'bg-emerald-500';
+  };
+
+  const isVertical = direction === 'N' || direction === 'S';
+
+  return (
+    <div className={`flex items-center gap-2 ${isVertical ? 'flex-col' : 'flex-row'}`}>
+       <div className={`${isVertical ? 'w-2 h-24' : 'w-24 h-2'} bg-slate-900 rounded-full overflow-hidden relative border border-slate-800`}>
+          <motion.div 
+            initial={{ [isVertical ? 'height' : 'width']: 0 }}
+            animate={{ [isVertical ? 'height' : 'width']: `${percentage}%` }}
+            className={`absolute bottom-0 left-0 w-full h-full transition-colors ${getColor()}`} 
+          />
        </div>
     </div>
   );
@@ -46,59 +50,29 @@ export const JunctionMap = ({ state }: JunctionMapProps) => {
       {/* Blueprint Grid */}
       <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:30px_30px]" />
       
-      {/* Road Network SVG */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
-         <svg viewBox="0 0 400 400" className="w-full h-full">
-            {/* Base Roads */}
-            <rect x="150" y="0" width="100" height="400" fill="#111827" rx="4" />
-            <rect x="0" y="150" width="400" height="100" fill="#111827" rx="4" />
-            
-            {/* Lane Glow */}
-            {(state.current_phase === 'north' || state.current_phase === 'south') ? (
-               <rect x="150" y="0" width="100" height="400" fill="url(#activeGlowVert)" opacity="0.1" />
-            ) : (
-               <rect x="0" y="150" width="400" height="100" fill="url(#activeGlowHoriz)" opacity="0.1" />
-            )}
-
-            {/* Lane Markings */}
-            <path d="M 200 0 V 150 M 200 250 V 400 M 0 200 H 150 M 250 200 H 400" stroke="#1e293b" strokeWidth="1" strokeDasharray="8 8" fill="none" />
-            
-            {/* Animated Traffic Particles */}
-            <g>
-               {state.current_phase === 'north' && [...Array(4)].map((_, i) => (
-                  <motion.circle key={`n-${i}`} r="2.5" fill="#10b981" animate={{ cy: [0, 400] }} transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.6, ease: "linear" }} style={{ cx: 175 }} />
-               ))}
-               {state.current_phase === 'south' && [...Array(4)].map((_, i) => (
-                  <motion.circle key={`s-${i}`} r="2.5" fill="#10b981" animate={{ cy: [400, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.6, ease: "linear" }} style={{ cx: 225 }} />
-               ))}
-               {state.current_phase === 'east' && [...Array(4)].map((_, i) => (
-                  <motion.circle key={`e-${i}`} r="2.5" fill="#10b981" animate={{ cx: [400, 0] }} transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.6, ease: "linear" }} style={{ cy: 175 }} />
-               ))}
-               {state.current_phase === 'west' && [...Array(4)].map((_, i) => (
-                  <motion.circle key={`w-${i}`} r="2.5" fill="#10b981" animate={{ cx: [0, 400] }} transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.6, ease: "linear" }} style={{ cy: 225 }} />
-               ))}
-            </g>
-
-            <defs>
-               <linearGradient id="activeGlowVert" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0" />
-                  <stop offset="50%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-               </linearGradient>
-               <linearGradient id="activeGlowHoriz" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0" />
-                  <stop offset="50%" stopColor="#10b981" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-               </linearGradient>
-            </defs>
-         </svg>
+      {/* North */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-8">
+        <DensityBar count={state.lanes.north.vehicle_count} direction="N" />
+        <Signal direction="N" phase="north" isActive={state.current_phase === 'north' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'north'} />
       </div>
 
-      {/* Lane Labels - Placed INSIDE roads */}
-      <LaneLabel name="North" data={state.lanes.north} isActive={state.current_phase === 'north'} position="top-6 left-1/2 -translate-x-1/2" />
-      <LaneLabel name="South" data={state.lanes.south} isActive={state.current_phase === 'south'} position="bottom-6 left-1/2 -translate-x-1/2" />
-      <LaneLabel name="West" data={state.lanes.west} isActive={state.current_phase === 'west'} position="top-1/2 left-6 -translate-y-1/2" />
-      <LaneLabel name="East" data={state.lanes.east} isActive={state.current_phase === 'east'} position="top-1/2 right-6 -translate-y-1/2" />
+      {/* South */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center flex-row-reverse gap-8">
+        <DensityBar count={state.lanes.south.vehicle_count} direction="S" />
+        <Signal direction="S" phase="south" isActive={state.current_phase === 'south' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'south'} />
+      </div>
+
+      {/* East */}
+      <div className="absolute top-1/2 right-4 -translate-y-1/2 flex flex-col items-center gap-6">
+        <Signal direction="E" phase="east" isActive={state.current_phase === 'east' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'east'} />
+        <DensityBar count={state.lanes.east.vehicle_count} direction="E" />
+      </div>
+
+      {/* West */}
+      <div className="absolute top-1/2 left-4 -translate-y-1/2 flex flex-col-reverse items-center gap-6">
+        <Signal direction="W" phase="west" isActive={state.current_phase === 'west' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'west'} />
+        <DensityBar count={state.lanes.west.vehicle_count} direction="W" />
+      </div>
 
       {/* Center AI Core - Compact and integrated */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">

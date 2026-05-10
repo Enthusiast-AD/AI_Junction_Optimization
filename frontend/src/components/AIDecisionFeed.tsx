@@ -8,7 +8,7 @@ interface AIDecisionFeedProps {
 
 export const AIDecisionFeed = ({ decisions }: AIDecisionFeedProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
       <AnimatePresence initial={false}>
         {decisions.slice(0, 3).map((decision, index) => (
           <motion.div

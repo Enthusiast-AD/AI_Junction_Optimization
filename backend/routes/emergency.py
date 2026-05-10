@@ -16,8 +16,7 @@ async def trigger_emergency(trigger: EmergencyTrigger, db: Session = Depends(get
     # Save to db
     event = EmergencyEvent(
         direction=trigger.direction,
-        vehicle_type=trigger.vehicle_type,
-        duration_seconds=trigger.duration_override_seconds
+        vehicle_type=trigger.vehicle_type,        duration_seconds=trigger.duration_override_seconds
     )
     db.add(event)
     db.commit()
@@ -46,10 +45,16 @@ async def cancel_emergency():
     old_direction = engine.state.emergency_direction
     engine.state.emergency_direction = None
     
+    # Broadcast cancellation immediately to sync UI
+    await manager.broadcast({
+        "type": "state_update",
+        "data": engine.state.model_dump()
+    })
+    
     return {
         "status": "cancelled",
-        "resuming_phase": "east",
-        "reason": "Highest density lane after emergency clearance"
+        "resuming_phase": engine.state.current_phase,
+        "reason": "Emergency clearance complete"
     }
 
 @router.get("/log")

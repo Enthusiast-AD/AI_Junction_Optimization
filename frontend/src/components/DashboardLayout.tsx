@@ -9,10 +9,11 @@ import {
   Bell
 } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useSocket } from '../hooks/useSocket';
+import { useJunctionWebSocket } from '../hooks/useJunctionWebSocket';
 import { useJunctionStore } from '../store/useJunctionStore';
 
-const SidebarItem = ({ to, icon: Icon, label, end }: { to: string; icon: any; label: string; end?: boolean }) => (
+const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => (
+
   <NavLink
     to={to}
     end={end}
@@ -31,14 +32,8 @@ const SidebarItem = ({ to, icon: Icon, label, end }: { to: string; icon: any; la
 );
 
 const DashboardLayout = () => {
-  const navigate = useNavigate();
-  useSocket(); // Global websocket connection
-  const connectionStatus = useJunctionStore((state) => state.connectionStatus);
-
-  const handleSignOut = () => {
-    // In a real app, clear tokens here
-    navigate('/');
-  };
+  useJunctionWebSocket();
+  const { connectionStatus } = useJunctionStore();
 
   return (
     <div className="flex min-h-screen w-full bg-slate-950 text-slate-100">
@@ -64,15 +59,10 @@ const DashboardLayout = () => {
             <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
               <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">System Status</div>
               <div className="flex items-center gap-2">
-                <div className={clsx(
-                  "w-2 h-2 rounded-full",
-                  connectionStatus === 'connected' ? "bg-emerald-500 animate-pulse" : 
-                  connectionStatus === 'connecting' ? "bg-amber-500 animate-pulse" : "bg-rose-500"
-                )} />
-                <span className="text-sm font-medium text-slate-300">
-                  {connectionStatus === 'connected' ? 'Live System' : 
-                   connectionStatus === 'connecting' ? 'Connecting...' : 'Offline'}
-                </span>
+                 <div className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                 <span className="text-sm font-medium text-slate-300">
+                   {connectionStatus === 'connected' ? 'Live WebSocket' : 'Disconnected'}
+                 </span>
               </div>
             </div>
            

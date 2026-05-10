@@ -8,8 +8,8 @@ interface DensityChartProps {
 
 export const DensityChart = ({ data, activeLane = 'north' }: DensityChartProps) => {
   return (
-    <div className="w-full h-[300px] mt-4">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full h-[300px] mt-4 min-h-[300px]">
+      <ResponsiveContainer width="100%" height="100%" minHeight={300}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
