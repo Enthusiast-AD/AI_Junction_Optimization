@@ -1,3 +1,4 @@
+import os
 from simulation.models import CongestionPrediction
 from config import settings
 from datetime import datetime
@@ -18,6 +19,8 @@ async def generate_prediction(history_data: list) -> CongestionPrediction:
             model_used="static-fallback"
         )
         
+    os.environ["GOOGLE_API_KEY"] = settings.GOOGLE_AI_API_KEY
+    import google.generativeai as genai
     genai.configure(api_key=settings.GOOGLE_AI_API_KEY)
     model = genai.GenerativeModel(settings.GEMINI_MODEL)
     
@@ -48,6 +51,11 @@ async def generate_prediction(history_data: list) -> CongestionPrediction:
             model_used=settings.GEMINI_MODEL
         )
     except Exception as e:
+         error_msg = str(e)
+         try:
+             error_msg += " | content: " + response.text
+         except:
+             pass
          return CongestionPrediction(
             generated_at=datetime.utcnow(),
             congestion_risk="medium",

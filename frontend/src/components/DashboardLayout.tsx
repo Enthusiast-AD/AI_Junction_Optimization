@@ -35,6 +35,11 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   useJunctionWebSocket();
   const { connectionStatus } = useJunctionStore();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    navigate('/signin');
+  };
 
   const handleSignOut = () => {
     navigate('/');

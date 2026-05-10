@@ -43,7 +43,8 @@ const OverviewPage = () => {
     emergencyActive,
     connectionStatus,
     setEmergency,
-    addInsight
+    addInsight,
+    connectionStatus
   } = useJunctionStore();
 
   useEffect(() => {
