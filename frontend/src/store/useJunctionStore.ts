@@ -38,8 +38,16 @@ export const useJunctionStore = create<JunctionStore>((set) => ({
   addInsight: (insight) => set((state) => ({
     insightLog: [insight, ...state.insightLog.slice(0, 9)] // Keep last 10
   })),
-  setEmergency: (active, direction) => set({ 
-    emergencyActive: active, 
-    emergencyDirection: direction 
+  setEmergency: (active, direction) => set((state) => {
+    // Apply immediate local update to clear red styling if cancelled
+    if (state.junctionState) {
+        state.junctionState.emergency_active = active;
+        state.junctionState.emergency_direction = direction;
+    }
+    return {
+        emergencyActive: active,
+        emergencyDirection: direction,
+        junctionState: state.junctionState
+    };
   }),
 }));

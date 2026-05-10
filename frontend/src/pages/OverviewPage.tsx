@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -15,8 +15,6 @@ import { DensityChart } from '../components/DensityChart';
 import { AIDecisionFeed } from '../components/AIDecisionFeed';
 import { EmergencyPanel } from '../components/EmergencyPanel';
 import { useJunctionStore } from '../store/useJunctionStore';
-import { generateMockState, generateMockHistory } from '../utils/mockData';
-// import type { JunctionState, DensityDataPoint } from '../types';
 
 const StatCard = ({ title, value, unit, icon: Icon, trend, color }: any) => (
   <Card className="flex-1">
@@ -44,45 +42,36 @@ const StatCard = ({ title, value, unit, icon: Icon, trend, color }: any) => (
 const OverviewPage = () => {
   const { 
     junctionState, 
-    setJunctionState, 
-    densityHistory, 
-    appendDensityPoint,
+    densityHistory,
     decisionLog,
-    addDecision,
+    insightLog,
     emergencyActive,
-    setEmergency
+    setEmergency,
+    addInsight
   } = useJunctionStore();
 
-  const [simSpeed] = useState(1);
-
-  // Simulation Loop (Mocked)
   useEffect(() => {
-    // Initial data
-    if (!junctionState) {
-        const initialState = generateMockState();
-        setJunctionState(initialState);
-        generateMockHistory(30).forEach(point => appendDensityPoint(point));
-    }
+      // Poll prediction endpoint every 2 minutes
+      const fetchPrediction = async () => {
+          try {
+              const res = await fetch('http://localhost:8000/api/ai/prediction');
+              const data = await res.json();
+              addInsight(data);
+          } catch(e) {
+              console.error("Failed to fetch predictive insight", e);
+          }
+      };
 
-    const interval = setInterval(() => {
-      const nextState = generateMockState(junctionState?.current_phase);
-      setJunctionState(nextState);
-      appendDensityPoint({
-          timestamp: nextState.timestamp,
-          north: nextState.lanes.north.vehicle_count,
-          south: nextState.lanes.south.vehicle_count,
-          east: nextState.lanes.east.vehicle_count,
-          west: nextState.lanes.west.vehicle_count,
-      });
-      if (nextState.ai_decision) {
-          addDecision(nextState.ai_decision);
-      }
-    }, 5000 / simSpeed);
+      fetchPrediction(); // call immediately on mount
+      const interval = setInterval(fetchPrediction, 120000); 
+      return () => clearInterval(interval);
+  }, [addInsight]);
 
-    return () => clearInterval(interval);
-  }, [junctionState, simSpeed]);
-
-  if (!junctionState) return null;
+  if (!junctionState) return (
+    <div className="flex items-center justify-center h-full">
+      <p className="text-slate-500">Waiting for live data via WebSocket...</p>
+    </div>
+  );
 
   return (
     <motion.div
@@ -204,8 +193,22 @@ const OverviewPage = () => {
         <div className="space-y-8">
            <EmergencyPanel 
              isActive={emergencyActive} 
-             onActivate={(dir) => setEmergency(true, dir)} 
-             onCancel={() => setEmergency(false, null)} 
+             onActivate={(dir, type) => {
+                 setEmergency(true, dir);
+                 fetch('http://localhost:8000/api/emergency/trigger', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({
+                         direction: dir,
+                         vehicle_type: type,
+                         duration_override_seconds: 120
+                     })
+                 }).catch(console.error);
+             }} 
+             onCancel={() => {
+                 setEmergency(false, null);
+                 fetch('http://localhost:8000/api/emergency/cancel', { method: 'POST' }).catch(console.error);
+             }} 
            />
 
            <Card className="h-fit">
@@ -231,13 +234,21 @@ const OverviewPage = () => {
                     </div>
                     <CardTitle className="text-indigo-100">Predictive Insight</CardTitle>
                  </div>
-                 <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 mb-4">
-                    <div className="flex items-center gap-2 text-rose-400 text-xs font-bold uppercase mb-2">
-                       <AlertTriangle size={14} /> High Congestion Risk
-                    </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">
-                       North lane expected to peak in <span className="text-white font-bold">8 minutes</span>. Recommend pre-extending green phase by <span className="text-white font-bold">15s</span>.
-                    </p>
+                 <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 mb-4 h-[120px] overflow-y-auto">
+                    {insightLog.length > 0 ? (
+                       <>
+                          <div className="flex items-center gap-2 text-rose-400 text-xs font-bold uppercase mb-2">
+                             <AlertTriangle size={14} /> Risk: {insightLog[0].congestion_risk}
+                          </div>
+                          <p className="text-sm text-slate-300 leading-relaxed">
+                             {insightLog[0].recommendation}
+                          </p>
+                       </>
+                    ) : (
+                       <div className="h-full flex items-center justify-center text-sm text-indigo-300 italic">
+                          Awaiting prediction model data...
+                       </div>
+                    )}
                  </div>
                  <Button variant="outline" size="sm" className="w-full border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10">
                     View Analysis

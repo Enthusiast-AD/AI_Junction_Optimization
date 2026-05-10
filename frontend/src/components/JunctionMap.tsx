@@ -7,13 +7,14 @@ interface JunctionMapProps {
   onEmergencyTrigger?: (direction: string) => void;
 }
 
-const Signal = ({ isActive, direction }: { phase: string; isActive: boolean; direction: 'N' | 'S' | 'E' | 'W' }) => {
+const Signal = ({ isActive, isEmergencyOverride, direction }: { phase: string; isActive: boolean; isEmergencyOverride: boolean; direction: 'N' | 'S' | 'E' | 'W' }) => {
+  const showGreen = isActive || isEmergencyOverride;
   return (
     <div className="flex flex-col items-center gap-1">
       <span className="text-[10px] font-bold text-slate-500">{direction}</span>
       <div className="w-6 h-14 bg-slate-900 rounded-full border border-slate-800 p-1 flex flex-col gap-1 items-center">
-        <div className={`w-4 h-4 rounded-full transition-colors duration-300 ${!isActive ? 'bg-red-500/10' : 'bg-red-500/20'}`} />
-        <div className={`w-4 h-4 rounded-full transition-colors duration-300 ${isActive ? 'bg-green-500' : 'bg-green-500/10'} ${isActive ? 'shadow-[0_0_12px_rgba(34,197,94,0.5)]' : ''}`} />
+        <div className={`w-4 h-4 rounded-full transition-colors duration-300 ${showGreen ? 'bg-red-500/10' : 'bg-red-500'} ${!showGreen ? 'shadow-[0_0_12px_rgba(239,68,68,0.5)]' : ''}`} />
+        <div className={`w-4 h-4 rounded-full transition-colors duration-300 ${showGreen ? 'bg-green-500' : 'bg-green-500/10'} ${showGreen ? 'shadow-[0_0_12px_rgba(34,197,94,0.5)]' : ''}`} />
       </div>
     </div>
   );
@@ -82,24 +83,24 @@ export const JunctionMap = ({ state }: JunctionMapProps) => {
       {/* North */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-8">
         <DensityBar count={state.lanes.north.vehicle_count} direction="N" />
-        <Signal direction="N" phase="north" isActive={state.current_phase === 'north'} />
+        <Signal direction="N" phase="north" isActive={state.current_phase === 'north' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'north'} />
       </div>
 
       {/* South */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center flex-row-reverse gap-8">
         <DensityBar count={state.lanes.south.vehicle_count} direction="S" />
-        <Signal direction="S" phase="south" isActive={state.current_phase === 'south'} />
+        <Signal direction="S" phase="south" isActive={state.current_phase === 'south' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'south'} />
       </div>
 
       {/* East */}
       <div className="absolute top-1/2 right-4 -translate-y-1/2 flex flex-col items-center gap-6">
-        <Signal direction="E" phase="east" isActive={state.current_phase === 'east'} />
+        <Signal direction="E" phase="east" isActive={state.current_phase === 'east' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'east'} />
         <DensityBar count={state.lanes.east.vehicle_count} direction="E" />
       </div>
 
       {/* West */}
       <div className="absolute top-1/2 left-4 -translate-y-1/2 flex flex-col-reverse items-center gap-6">
-        <Signal direction="W" phase="west" isActive={state.current_phase === 'west'} />
+        <Signal direction="W" phase="west" isActive={state.current_phase === 'west' && !state.emergency_active} isEmergencyOverride={state.emergency_active && state.emergency_direction === 'west'} />
         <DensityBar count={state.lanes.west.vehicle_count} direction="W" />
       </div>
 

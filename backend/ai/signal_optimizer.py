@@ -6,14 +6,20 @@ import time
 decision_cache = {}
 
 def _greedy_fallback(state: JunctionState) -> AIDecision:
-    """Density-weighted greedy: pick lane with most vehicles"""
-    best_lane = max(state.lanes.keys(), key=lambda l: state.lanes[l].vehicle_count)
+    """Density & Wait-time weighted greedy logic to prevent starvation."""
+    def calculate_score(lane_name):
+        lane = state.lanes[lane_name]
+        # Multiply vehicles by wait time factor to prevent starvation
+        return lane.vehicle_count * (1 + (lane.avg_wait_seconds / 20.0))
+        
+    best_lane = max(state.lanes.keys(), key=calculate_score)
     density = state.lanes[best_lane].vehicle_count
-    duration = min(15 + density * 1.5, 60)  # 15-60 seconds
+    wait_time = state.lanes[best_lane].avg_wait_seconds
+    duration = min(15 + density * 1.5 + (wait_time * 0.2), 60)  # 15-60 seconds
     return AIDecision(
         recommended_phase=best_lane,
         duration_seconds=int(duration),
-        reason=f"Greedy: {best_lane} lane has highest density ({density} vehicles)",
+        reason=f"Greedy Fallback: {best_lane} lane scored highest (Density: {density}, Wait: {int(wait_time)}s) to prevent starvation.",
         confidence=0.7,
         model_used="rule-based-greedy",
         latency_ms=0
@@ -33,13 +39,14 @@ async def _call_groq(state: JunctionState) -> AIDecision:
     You are a traffic signal controller AI. Always respond with valid JSON only. No explanation outside the JSON.
 
     User: Junction state:
-    - North lane: {state.lanes['north'].vehicle_count} vehicles ({state.lanes['north'].density_percent}% density)
-    - South lane: {state.lanes['south'].vehicle_count} vehicles ({state.lanes['south'].density_percent}% density)
-    - East lane:  {state.lanes['east'].vehicle_count} vehicles ({state.lanes['east'].density_percent}% density)
-    - West lane:  {state.lanes['west'].vehicle_count} vehicles ({state.lanes['west'].density_percent}% density)
+    - North lane: {state.lanes['north'].vehicle_count} vehicles ({state.lanes['north'].density_percent}% density, {int(state.lanes['north'].avg_wait_seconds)}s wait)
+    - South lane: {state.lanes['south'].vehicle_count} vehicles ({state.lanes['south'].density_percent}% density, {int(state.lanes['south'].avg_wait_seconds)}s wait)
+    - East lane:  {state.lanes['east'].vehicle_count} vehicles ({state.lanes['east'].density_percent}% density, {int(state.lanes['east'].avg_wait_seconds)}s wait)
+    - West lane:  {state.lanes['west'].vehicle_count} vehicles ({state.lanes['west'].density_percent}% density, {int(state.lanes['west'].avg_wait_seconds)}s wait)
     - Current green phase: {state.current_phase} (active for {state.phase_elapsed_seconds}s)
     - Emergency vehicle: {state.emergency_active}
     
+    CRITICAL: You MUST select the lane with high density that has been waiting the longest to prevent starvation. Do not continually switch between just two lanes.
     Decide the next signal phase. Respond with JSON:
     {{"phase": "north|south|east|west", "duration_seconds": <15-60>, "reason": "<one sentence>"}}
     """

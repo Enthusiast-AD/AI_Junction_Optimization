@@ -45,16 +45,26 @@ class SimulationEngine:
                 cleared = int(SIMULATION_CONFIG["green_drain_rate"] * SIMULATION_CONFIG["update_interval_seconds"])
                 lane_data.vehicle_count = max(0, lane_data.vehicle_count - cleared)
                 self.state.performance.total_vehicles_cleared += cleared
+                # Decrease avg wait time significantly when green
+                lane_data.avg_wait_seconds = max(0.0, lane_data.avg_wait_seconds - (SIMULATION_CONFIG["update_interval_seconds"] * 2))
             else:
                 # Accumulate vehicles if red
                 added = int(SIMULATION_CONFIG["red_accumulation_rate"] * SIMULATION_CONFIG["update_interval_seconds"])
                 # Add random noise
                 added += random.randint(-1, 2)
                 lane_data.vehicle_count = min(SIMULATION_CONFIG["max_vehicles_per_lane"], max(0, lane_data.vehicle_count + added))
+                # Increase avg wait time
+                if lane_data.vehicle_count > 0:
+                    lane_data.avg_wait_seconds += SIMULATION_CONFIG["update_interval_seconds"]
             
             lane_data.density_percent = (lane_data.vehicle_count / SIMULATION_CONFIG["max_vehicles_per_lane"]) * 100
 
         self.state.phase_elapsed_seconds += SIMULATION_CONFIG["update_interval_seconds"]
+        
+        # EARLY EXIT: If the current green lane is completely empty, don't wait for the phase to finish naturally
+        if self.state.lanes[self.state.current_phase].vehicle_count <= 0 and self.state.phase_elapsed_seconds >= 10:
+             self.state.phase_elapsed_seconds = self.state.phase_duration_seconds # Force phase change
+             
         self.state.timestamp = datetime.utcnow()
 
     async def run_loop(self):

@@ -9,8 +9,11 @@ import {
   Bell
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useJunctionWebSocket } from '../hooks/useJunctionWebSocket';
+import { useJunctionStore } from '../store/useJunctionStore';
 
 const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => (
+
   <NavLink
     to={to}
     className={({ isActive }) =>
@@ -28,6 +31,9 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: 
 );
 
 const DashboardLayout = () => {
+  useJunctionWebSocket();
+  const { connectionStatus } = useJunctionStore();
+
   return (
     <div className="flex min-h-screen w-full bg-slate-950 text-slate-100">
       {/* Sidebar */}
@@ -52,8 +58,10 @@ const DashboardLayout = () => {
            <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
               <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">System Status</div>
               <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-sm font-medium text-slate-300">Live Simulation</span>
+                 <div className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                 <span className="text-sm font-medium text-slate-300">
+                   {connectionStatus === 'connected' ? 'Live WebSocket' : 'Disconnected'}
+                 </span>
               </div>
            </div>
            
