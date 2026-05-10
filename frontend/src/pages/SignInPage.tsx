@@ -83,6 +83,15 @@ const SignInPage = () => {
             >
               Authorize Access
             </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full py-3 mt-2 border-primary-500/30 hover:bg-primary-500/10 text-primary-400"
+              onClick={() => navigate('/dashboard')}
+            >
+              Demo Login
+            </Button>
           </form>
 
           <div className="mt-8">
@@ -91,21 +100,13 @@ const SignInPage = () => {
                 <div className="w-full border-t border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-900 px-2 text-slate-500">Or continue with</span>
+                <span className="bg-slate-900 px-2 text-slate-500">Secure System Access</span>
               </div>
             </div>
-
-            <div className="mt-6 flex gap-3">
-              <button className="flex-1 flex items-center justify-center gap-2 py-2 px-4 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 text-sm">
-                GitHub
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 py-2 px-4 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 text-sm">
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12.48 10.92v3.28h7.84c-.24 1.84-.92 3.36-2.12 4.48-1.56 1.48-3.76 2.32-6.56 2.32-4.16 0-7.8-2.68-9.04-6.44l-.04-.12-.04-.12c-1.24-3.76 2.4-6.44 6.56-6.44 2.24 0 4.28.8 5.84 2.24l2.4-2.4C15.68 5.56 12.92 4.56 10.12 4.56 5.4 4.56 1.28 8.16 1.28 12.6s4.12 8.04 8.84 8.04c2.56 0 4.8-.84 6.44-2.4 1.68-1.68 2.32-4 2.32-5.96 0-.6-.04-1.2-.12-1.76l-6.32.04z" />
-                </svg>
-                Google
-              </button>
-            </div>
+            
+            <p className="text-center text-xs text-slate-500 mt-6">
+              Authorized personnel only. For demonstration purposes, please use the Demo Login option above.
+            </p>
           </div>
         </div>
 

@@ -35,15 +35,11 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   useJunctionWebSocket();
   const { connectionStatus } = useJunctionStore();
-  const navigate = useNavigate();
 
   const handleSignOut = () => {
     navigate('/signin');
   };
 
-  const handleSignOut = () => {
-    navigate('/');
-  };
 
   return (
     <div className="flex min-h-screen w-full bg-slate-950 text-slate-100">
