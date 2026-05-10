@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { 
   Users, 
   Clock, 
-
+  TrendingUp,
   Activity,
   AlertTriangle,
   Zap,
@@ -44,7 +44,8 @@ const OverviewPage = () => {
     insightLog,
     emergencyActive,
     setEmergency,
-    addInsight
+    addInsight,
+    connectionStatus
   } = useJunctionStore();
 
   useEffect(() => {
@@ -186,7 +187,7 @@ const OverviewPage = () => {
         </div>
 
         {/* Sidebar: Emergency, AI Decision Feed & Insights */}
-        <div className="space-y-8">
+        <div className="xl:col-span-4 space-y-4">
            <EmergencyPanel 
              isActive={emergencyActive} 
              onActivate={(dir, type) => {

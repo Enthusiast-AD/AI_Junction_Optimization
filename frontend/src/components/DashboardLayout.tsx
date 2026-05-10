@@ -12,7 +12,7 @@ import { clsx } from 'clsx';
 import { useJunctionWebSocket } from '../hooks/useJunctionWebSocket';
 import { useJunctionStore } from '../store/useJunctionStore';
 
-const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => (
+const SidebarItem = ({ to, icon: Icon, label, end }: { to: string; icon: any; label: string; end?: boolean }) => (
 
   <NavLink
     to={to}
@@ -34,6 +34,11 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: 
 const DashboardLayout = () => {
   useJunctionWebSocket();
   const { connectionStatus } = useJunctionStore();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    navigate('/signin');
+  };
 
   return (
     <div className="flex min-h-screen w-full bg-slate-950 text-slate-100">
