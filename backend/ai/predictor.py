@@ -38,6 +38,7 @@ async def generate_prediction(history_data: list) -> CongestionPrediction:
     
     try:
         response = await model.generate_content_async(prompt)
+        # parsing logic left basic for hackathon structure
         content = response.text.replace("```json", "").replace("```", "").strip()
         parsed = json.loads(content)
         return CongestionPrediction(
@@ -59,8 +60,8 @@ async def generate_prediction(history_data: list) -> CongestionPrediction:
             generated_at=datetime.utcnow(),
             congestion_risk="medium",
             predicted_peak_lane="north",
-            predicted_peak_in_minutes=15,
-            recommendation="Divert traffic on the main arterial dynamically, utilizing phase shortening.",
-            summary=f"AI Engine fallback prediction generated",
+            predicted_peak_in_minutes=5,
+            recommendation="AI Prediction failed (Quota/Network)",
+            summary=str(e),
             model_used=settings.GEMINI_MODEL
         )
