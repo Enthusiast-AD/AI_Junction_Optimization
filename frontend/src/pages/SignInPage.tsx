@@ -106,6 +106,15 @@ const SignInPage = () => {
             >
               Authorize &amp; Launch Dashboard
             </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full py-3 mt-2 border-primary-500/30 hover:bg-primary-500/10 text-primary-400"
+              onClick={() => navigate('/dashboard')}
+            >
+              Demo Login
+            </Button>
           </form>
         </div>
       </motion.div>

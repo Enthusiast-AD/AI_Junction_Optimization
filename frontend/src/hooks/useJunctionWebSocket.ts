@@ -5,8 +5,10 @@ export function useJunctionWebSocket() {
   const { setJunctionState, setConnectionStatus, appendDensityPoint, addDecision, setEmergency } = useJunctionStore();
   const wsRef = useRef<WebSocket | null>(null);
 
+  const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+
   useEffect(() => {
-    let ws = new WebSocket('ws://localhost:8000/ws');
+    let ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
     const onOpen = () => {

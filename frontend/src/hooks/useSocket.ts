@@ -15,11 +15,13 @@ export const useSocket = () => {
   
   const socketRef = useRef<WebSocket | null>(null);
 
+  const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+
   useEffect(() => {
     const connect = () => {
       setConnectionStatus('connecting');
       
-      const wsUrl = 'ws://localhost:8000/ws';
+      const wsUrl = WS_URL;
       const socket = new WebSocket(wsUrl);
       socketRef.current = socket;
 

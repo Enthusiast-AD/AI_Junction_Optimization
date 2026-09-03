@@ -10,7 +10,10 @@ def _greedy_fallback(state: JunctionState) -> AIDecision:
     def calculate_score(lane_name):
         lane = state.lanes[lane_name]
         # Multiply vehicles by wait time factor to prevent starvation
-        return lane.vehicle_count * (1 + (lane.avg_wait_seconds / 20.0))
+        score = lane.vehicle_count * (1 + (lane.avg_wait_seconds / 20.0))
+        if lane_name == state.current_phase:
+            score *= 0.1 # heavily penalize current phase
+        return score
         
     best_lane = max(state.lanes.keys(), key=calculate_score)
     density = state.lanes[best_lane].vehicle_count
@@ -46,7 +49,7 @@ async def _call_groq(state: JunctionState) -> AIDecision:
     - Current green phase: {state.current_phase} (active for {state.phase_elapsed_seconds}s)
     - Emergency vehicle: {state.emergency_active}
     
-    CRITICAL: You MUST select the lane with high density that has been waiting the longest to prevent starvation. Do not continually switch between just two lanes.
+    CRITICAL: You MUST select the lane with high density that has been waiting the longest to prevent starvation. You MUST NOT select the current green phase ({state.current_phase}) again unless all other lanes are empty.
     Decide the next signal phase. Respond with JSON:
     {{"phase": "north|south|east|west", "duration_seconds": <15-60>, "reason": "<one sentence>"}}
     """
@@ -69,7 +72,8 @@ async def _call_groq(state: JunctionState) -> AIDecision:
     latency = int((time.time() - start_time) * 1000)
     
     response_content = chat_completion.choices[0].message.content
-    parsed = json.loads(response_content)
+    content = response_content.replace("```json", "").replace("```", "").strip()
+    parsed = json.loads(content)
     
     return AIDecision(
         recommended_phase=parsed["phase"],
@@ -95,20 +99,11 @@ async def get_signal_decision(state: JunctionState) -> AIDecision:
             latency_ms=0
         )
         
-    counts_tuple = tuple((k, v.vehicle_count) for k, v in state.lanes.items())
-    cache_key = hash(counts_tuple)
-    
-    if cached := decision_cache.get(cache_key):
-        return cached
-
     try:
         decision = await _call_groq(state)
-        decision_cache[cache_key] = decision
         return decision
     except Exception as e:
         print(f"Groq failed: {e}")
         pass
         
-    # Try openrouter
-    
     return _greedy_fallback(state)
