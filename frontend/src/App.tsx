@@ -7,6 +7,7 @@ import OverviewPage from './pages/OverviewPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import InsightsPage from './pages/InsightsPage';
 import SettingsPage from './pages/SettingsPage';
+import ANNStudioPage from './pages/ANNStudioPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<OverviewPage />} />
+          <Route path="ann-studio" element={<ANNStudioPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="insights" element={<InsightsPage />} />
           <Route path="settings" element={<SettingsPage />} />
