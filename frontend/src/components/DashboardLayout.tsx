@@ -47,16 +47,20 @@ const DashboardLayout = () => {
       <aside className="w-64 border-r border-slate-900 flex flex-col shrink-0">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-10">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-tr from-primary-600 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/30">
               <Activity className="text-white w-5 h-5" />
             </div>
-            <span className="text-lg font-bold">AI Junction</span>
+            <div>
+              <span className="text-base font-black tracking-tight text-white block">NeuroTraffic</span>
+              <span className="text-[9px] font-mono text-primary-400 font-bold tracking-widest block -mt-1 uppercase">ANN Optimization</span>
+            </div>
           </div>
 
-          <nav className="space-y-2">
-            <SidebarItem to="/dashboard" end={true} icon={LayoutDashboard} label="Overview" />
-            <SidebarItem to="/dashboard/analytics" icon={BarChart3} label="Analytics" />
-            <SidebarItem to="/dashboard/insights" icon={BrainCircuit} label="AI Insights" />
+          <nav className="space-y-1.5">
+            <SidebarItem to="/dashboard" end={true} icon={LayoutDashboard} label="Live Junction" />
+            <SidebarItem to="/dashboard/ann-studio" icon={BrainCircuit} label="ANN Neural Studio" />
+            <SidebarItem to="/dashboard/analytics" icon={BarChart3} label="Analytics & Benchmarks" />
+            <SidebarItem to="/dashboard/insights" icon={Activity} label="XAI & Forecasting" />
             <SidebarItem to="/dashboard/settings" icon={Settings} label="Settings" />
           </nav>
         </div>

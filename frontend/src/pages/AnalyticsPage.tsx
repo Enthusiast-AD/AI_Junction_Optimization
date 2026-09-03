@@ -165,9 +165,9 @@ const AnalyticsPage = () => {
             onChange={(e) => setFilter(e.target.value)}
           >
             <option value="all">All Models</option>
-            <option value="llama-3.1-8b-instant">Groq Llama 3</option>
-            <option value="gemini-2.5-flash">Gemini Flash</option>
-            <option value="rule-based-override">Rule Based</option>
+            <option value="TrafficOptimizationANN (PyTorch MLP)">TrafficOptimizationANN (PyTorch)</option>
+            <option value="Emergency-ANN-Override">Emergency Override</option>
+            <option value="rule-based-fallback">Greedy Fallback</option>
           </select>
         </CardHeader>
         <CardContent>

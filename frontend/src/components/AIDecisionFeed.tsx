@@ -19,11 +19,13 @@ export const AIDecisionFeed = ({ decisions }: AIDecisionFeedProps) => {
             className="p-4 rounded-2xl bg-slate-950/50 border border-slate-800/50 flex items-start gap-4 transition-all hover:bg-slate-900/50 hover:border-slate-700"
           >
             <div className={`mt-1 p-2 rounded-xl shrink-0 ${
-              decision.model_used.includes('llama') ? 'bg-primary-500/10 text-primary-400 border border-primary-500/20' :
-              decision.model_used.includes('gemini') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-              'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+              decision.model_used.includes('ANN') || decision.model_used.includes('PyTorch')
+                ? 'bg-primary-500/10 text-primary-400 border border-primary-500/20' 
+                : decision.model_used.includes('Emergency')
+                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                  : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
             }`}>
-              {decision.model_used.includes('llama') ? <Cpu size={18} /> : <Brain size={18} />}
+              {decision.model_used.includes('Emergency') ? <Cpu size={18} /> : <Brain size={18} />}
             </div>
             
             <div className="flex-1 min-w-0">

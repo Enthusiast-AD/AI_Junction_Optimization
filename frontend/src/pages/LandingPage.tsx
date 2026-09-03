@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Activity, ShieldAlert, TrendingUp, ArrowRight,Database, Brain, Network, Cpu, LineChart } from 'lucide-react';
+import { Activity, Zap, ShieldAlert, TrendingUp, ArrowRight, Database, Brain, Clock, Car, Server } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 
@@ -54,28 +54,36 @@ const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 container mx-auto px-6 pt-32 pb-24 flex flex-col items-center text-center">
-        
+      <section className="relative z-10 container mx-auto px-6 pt-20 pb-32 flex flex-col items-center text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/30 text-primary-400 text-xs font-bold mb-8"
+        >
+          <Zap size={14} />
+          <span>Deep Artificial Neural Network (ANN) Traffic Controller</span>
+        </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight"
+          transition={{ delay: 0.2 }}
+          className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tight"
         >
-          Intelligent Intersections. <br />
-          <span className="text-indigo-400">
-            Zero Congestion.
+          Adaptive Junctions with <br />
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-400 via-indigo-400 to-emerald-400">
+            Multi-Task Neural Networks
           </span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 font-light leading-relaxed"
+          transition={{ delay: 0.3 }}
+          className="text-slate-400 text-base md:text-lg max-w-2xl mb-10 leading-relaxed"
         >
-          Replace static signal cycles with real-time AI optimization powered by Groq and Gemini. Lower waiting times by up to <strong className="text-emerald-400 font-medium">30%</strong> and prioritize emergency vehicles instantly.
+          Replace static timer cycles with a PyTorch Deep MLP trained on 16,000+ Webster-optimized traffic scenarios. Reduce intersection delays by 42.5% with sub-2ms edge inference.
         </motion.p>
 
         <motion.div
@@ -84,12 +92,16 @@ const LandingPage = () => {
           transition={{ delay: 0.3 }}
           className="flex flex-col sm:flex-row gap-4"
         >
-          <Link to="/signin">
-            <Button size="lg" className="gap-2 bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)] px-8 font-medium">
-              Launch Dashboard <ArrowRight size={18} />
+          <Link to="/dashboard">
+            <Button size="lg" className="gap-2 bg-primary-500 hover:bg-primary-600 text-white font-bold shadow-lg shadow-primary-500/25">
+              Launch Live Junction <ArrowRight size={20} />
             </Button>
           </Link>
-          
+          <Link to="/dashboard/ann-studio">
+            <Button variant="outline" size="lg" className="gap-2 border-slate-700 text-slate-200 hover:bg-slate-800">
+              <Brain size={20} className="text-primary-400" /> Explore ANN Studio
+            </Button>
+          </Link>
         </motion.div>
 
         <motion.div

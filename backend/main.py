@@ -7,7 +7,7 @@ from database.db import Base, engine as db_engine
 from database import models as db_models  # Import to ensure metadata registers tables
 from simulation.engine import engine as sim_engine
 from websocket.manager import manager
-from routes import junction, emergency, analytics, ai
+from routes import junction, emergency, analytics, ai, ann
 import uvicorn
 
 # Create DB tables
@@ -22,11 +22,11 @@ async def lifespan(app: FastAPI):
     # Shutdown
     sim_engine.running = False
 
-app = FastAPI(title="AI Junction Optimization API", lifespan=lifespan)
+app = FastAPI(title="ANN Intelligent Traffic Junction Optimization API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[settings.CORS_ORIGINS, "http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,6 +36,7 @@ app.include_router(junction.router, prefix="/api/junction", tags=["junction"])
 app.include_router(emergency.router, prefix="/api/emergency", tags=["emergency"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(ai.router, prefix="/api/ai", tags=["ai insights"])
+app.include_router(ann.router, prefix="/api/ann", tags=["ann neural network"])
 
 
 

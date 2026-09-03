@@ -1,0 +1,50 @@
+{
+  "mean": {
+    "north_count": 33.56675,
+    "south_count": 32.27425,
+    "east_count": 34.9669375,
+    "west_count": 32.3825625,
+    "north_wait": 42.00541187500001,
+    "south_wait": 40.43693625,
+    "east_wait": 43.580164375,
+    "west_wait": 40.583190625,
+    "north_density": 33.56675,
+    "south_density": 32.27425,
+    "east_density": 34.9669375,
+    "west_density": 32.3825625,
+    "emergency_active": 0.051,
+    "peak_factor": 0.6545243749999999
+  },
+  "std": {
+    "north_count": 27.37091051388129,
+    "south_count": 24.989376567780315,
+    "east_count": 27.91440793312183,
+    "west_count": 26.157928497112447,
+    "north_wait": 38.74601397441149,
+    "south_wait": 36.07214901359967,
+    "east_wait": 39.17649296729873,
+    "west_wait": 37.44055820164899,
+    "north_density": 27.37091051388129,
+    "south_density": 24.989376567780315,
+    "east_density": 27.91440793312183,
+    "west_density": 26.157928497112447,
+    "emergency_active": 0.2200046025122438,
+    "peak_factor": 0.2964730043292355
+  },
+  "feature_names": [
+    "north_count",
+    "south_count",
+    "east_count",
+    "west_count",
+    "north_wait",
+    "south_wait",
+    "east_wait",
+    "west_wait",
+    "north_density",
+    "south_density",
+    "east_density",
+    "west_density",
+    "emergency_active",
+    "peak_factor"
+  ]
+}

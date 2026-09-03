@@ -5,17 +5,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 
 const SignInPage = () => {
+  const [email, setEmail] = useState('evaluator@college.edu');
+  const [password, setPassword] = useState('ann-traffic-2026');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate auth
+    // Simulate instant auth
     setTimeout(() => {
       setIsLoading(false);
       navigate('/dashboard');
-    }, 1500);
+    }, 600);
+  };
+
+  const handleInstantDemo = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -30,58 +36,75 @@ const SignInPage = () => {
         className="w-full max-w-md z-10"
       >
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
-            <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
+          <Link to="/" className="inline-flex items-center gap-2.5 mb-6 group">
+            <div className="w-10 h-10 bg-gradient-to-tr from-primary-600 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:scale-110 transition-transform">
               <Activity className="text-white w-6 h-6" />
             </div>
-            <span className="text-2xl font-bold text-white">AI Junction</span>
+            <div className="text-left">
+              <span className="text-xl font-black text-white block">NeuroTraffic</span>
+              <span className="text-[9px] font-mono text-primary-400 font-bold uppercase tracking-widest block -mt-1">ANN Traffic Lab</span>
+            </div>
           </Link>
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="text-slate-400 mt-2">Enter your credentials to access the controller</p>
+          <h1 className="text-2xl font-black text-white">College Evaluator Portal</h1>
+          <p className="text-slate-400 text-xs mt-1.5">Sign in to access the real-time simulation &amp; ANN neural studio</p>
         </div>
 
-        <div className="glass-card p-8 rounded-2xl">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 shadow-2xl backdrop-blur-xl">
+          {/* Instant 1-Click Access Button for College Viva / Demonstrations */}
+          <div className="mb-6">
+            <button
+              onClick={handleInstantDemo}
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              ⚡ Instant 1-Click Access (Viva Demo)
+            </button>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-800"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                <span className="bg-slate-900/90 px-3 text-slate-500">Or sign in with credentials</span>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <input
                   type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   required
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2.5 pl-11 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
-                  placeholder="name@agency.gov"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary-500 transition-all font-mono"
+                  placeholder="evaluator@college.edu"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Access Token</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password / Token</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
                 <input
                   type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                   required
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2.5 pl-11 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary-500 transition-all font-mono"
                   placeholder="••••••••"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-slate-400 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-primary-600 focus:ring-primary-500" />
-                Remember me
-              </label>
-              <a href="#" className="text-primary-400 hover:text-primary-300 transition-colors">Forgot token?</a>
-            </div>
-
             <Button
               type="submit"
-              className="w-full py-3 mt-4"
+              className="w-full py-3 mt-4 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl text-xs"
               isLoading={isLoading}
             >
-              Authorize Access
+              Authorize &amp; Launch Dashboard
             </Button>
 
             <Button
@@ -93,29 +116,11 @@ const SignInPage = () => {
               Demo Login
             </Button>
           </form>
-
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-700"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-900 px-2 text-slate-500">Secure System Access</span>
-              </div>
-            </div>
-            
-            <p className="text-center text-xs text-slate-500 mt-6">
-              Authorized personnel only. For demonstration purposes, please use the Demo Login option above.
-            </p>
-          </div>
         </div>
-
-        <p className="mt-8 text-center text-slate-500 text-sm">
-          Don't have access? <a href="#" className="text-primary-400 hover:text-primary-300 font-medium">Contact your administrator</a>
-        </p>
       </motion.div>
     </div>
   );
 };
+
 
 export default SignInPage;
